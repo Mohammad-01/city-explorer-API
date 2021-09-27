@@ -1,57 +1,33 @@
 'use strict';
-
 const express = require('express');
-const server = express();
-
 require('dotenv').config();
 const cors = require('cors');
+const axios = require('axios');
 
-const dataOfWeather = require('./data/weather.json');
-
+const server = express();
 const PORT = process.env.PORT;
-
 server.use(cors());
 
-class theWaether {
-    constructor(date,description){
-        this.date = date;
-        this.description =description;
-    }
+//import
+const getMovies = require('./modules/movies.js')
+const getWeather = require('./modules/allweather.js')
 
+// Routes
+server.get('/getapiweather', getWeather);
+server.get('/getapimovies', getMovies);
+server.get('/test', testAPIRouteHandler);
+server.get('*', routeFoundHandler);
+
+// localhost:3005/ANYTHING
+function routeFoundHandler(req, res) {
+    res.status(404).send('NOT FOUND')
 }
-//http://localhost:3001/weather?city=Amman
 
-server.get('/weather',(req,res)=>{
+//for test
+function testAPIRouteHandler(req,res){ 
+    res.send( 'api is working')
+}
+server.listen(PORT,()=>{
+    console.log(`Listening on PORT ${PORT}`)
+})
 
-    try{
-        
-    let Find = req.query.city;
-
-    let Infocity = dataOfWeather.find((val)=>{
-        if(val.city_name === Find) {
-            return val
-        }
-        
-    });
-
-    let arr = Infocity.data.map(value => {
-            return new theWaether(value.datetime, value.weather.description);
-            
-    });
-            res.status(200).send(arr);
-
-        }
-        
-        catch (err) {
-            res.status(404).send("Something wrong");
-        }
-    });
-
-
-    server.get('*',(req,res)=>{
-        res.status(404).send('Not found')
-    })
-
-    server.listen(PORT,()=>{
-        console.log(`Listening : PORT ${PORT}`)
-    })
